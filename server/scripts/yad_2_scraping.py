@@ -5,10 +5,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time, random, re, json, os
+from datetime import datetime
 
 file_path = 'scrapet_data.json'
 data_path = f'/home/daniel/projects/{file_path}'
-data_from_json = []
+data_from_file = []
 item_ids = []
 
 # Function to check if CAPTCHA is present
@@ -52,7 +53,25 @@ def setup_browser():
     
     return browser
 
-def add_data_to_json(data, filename=file_path):
+def add_timestamp(data):
+    for item in data:
+        if 'timestamp' not in item:
+            item['timestamp'] = datetime.now().isoformat()
+    return data
+
+def write_data_to_file(data, filename=file_path):
+    try:
+        # Check if file exists
+        file_exists = os.path.isfile(file_path)
+        
+        if file_exists:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+    
+    except Exception as e:
+        print(f"Error handling JSON file {file_path}: {e}")
+
+def write_item_to_file(data, filename=file_path):
     try:
         # Check if file exists
         file_exists = os.path.isfile(file_path)
@@ -61,7 +80,7 @@ def add_data_to_json(data, filename=file_path):
         if file_exists:
             with open(file_path, 'r', encoding='utf-8') as file:
                 existing_data = json.load(file)
-                item_ids = [item['item_id'] for item in data_from_json]
+                item_ids = [item['item_id'] for item in data_from_file]
                 print(f"item_ids = {item_ids}")
             
         # Append new data to existing data
@@ -80,7 +99,7 @@ def add_data_to_json(data, filename=file_path):
         print(f"Error handling JSON file {file_path}: {e}")
     
 def read_data_from_json(filepath):
-    global data_from_json  # Declare that we are using the global variable
+    # global data_from_file  # Declare that we are using the global variable
     
     # if file exists, read from it:
     try: 
@@ -89,11 +108,14 @@ def read_data_from_json(filepath):
         
         if file_exists:
             with open(filepath, 'r', encoding='utf-8') as f:
-                data_from_json = json.load(f)     
-                        
+                json_data = json.load(f)     
         
+        number_of_data_items = len(json_data)   
+        print(f"number_of_data_items = {number_of_data_items}")
     except Exception as e:
         print(f"Error handling JSON file {file_path}: {e}")
+        
+    return json_data if file_exists else []
     
 
 def process_page(browser):
@@ -150,7 +172,7 @@ def process_page(browser):
                 'url': item_url
                 }
                 
-                add_data_to_json(data)
+                write_item_to_file(data)
                 
             except NoSuchElementException:
                 print("One or more elements not found in item")
@@ -162,7 +184,26 @@ def process_page(browser):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def delete_duplicate_from_file(filename=file_path):
+    # 1. Read data from the file
+    data = read_data_from_json(file_path)
+    
+    # 2.Delete duplicated item by id
+    # For eac item, check if its id exist in ids
+    ids = set()
+    
+    for item in data:
+        if item['item_id'] not in ids:
+            ids.add(item['item_id'])
+            
+        else:
+            data.remove(item)
+            
 
+    # 3. Write updated data to the file
+    write_data_to_file(data, filename=file_path)
+    print()
+    
 # Function to perform the scraping
 def scrape_yad2(attempts=5):
     
@@ -190,12 +231,20 @@ def scrape_yad2(attempts=5):
         # time.sleep(random.uniform(5, 10))
 
 # Run the scraper
-if __name__ == "__main__":
-    read_data_from_json(data_path)
-    # print("data_from_json = ")
-    # print(data_from_json)
+
+def main():
+    data_from_file = read_data_from_json(data_path)
+    
+    # Add timestamp to each item
+    updated_data = add_timestamp(data_from_file)
+    
+    # Write updated data back to JSON file
+    write_data_to_file(updated_data, filename=file_path)
+    delete_duplicate_from_file(filename=file_path)
     
     scrape_yad2()
+    
+if __name__ == "__main__":
+    main()
 
     
-print()
