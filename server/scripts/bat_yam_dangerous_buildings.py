@@ -8,21 +8,16 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import date, datetime
+from secure_openpyxl import read_xlsx_data
 
 file_path = '236.xlsx'
 data_path = f'/home/daniel/projects/{file_path}'
 
-def fetch_and_save_xml_data(url, output_file):
+def fetch_and_save_file(url, output_file):
     try:
         # Fetch the XML content from the URL
         response = requests.get(url)
-        response.raise_for_status()  # Raise an HTTPError if the HTTP request returned an unsuccessful status code
-
-        # Parse the XML content
-        # root = ET.fromstring(response.content)
-
-        # Save the XML data to a file
-        # tree = ET.ElementTree(root)
+        response.raise_for_status()  # Raise an HTTPError if the
         
         
         with open(output_file, 'wb') as f:
@@ -37,23 +32,23 @@ def fetch_and_save_xml_data(url, output_file):
         print(f"Error parsing the XML data: {e}")
     
 # Reading the saved XLSX file to verify
-def read_xlsx_data(file_path):
-    try:
-        # Load the workbook and select the active worksheet
-        workbook = load_workbook(file_path)
-        sheet = workbook.active
+# def unsecure_read_xlsx_data(file_path):
+#     try:
+#         # Load the workbook and select the active worksheet
+#         workbook = load_workbook(file_path)
+#         sheet = workbook.active
         
-        # Iterate through rows and columns to read data
-        data = []
-        for row in sheet.iter_rows(values_only=True):
-            if any(cell is not None for cell in row):
-                data.append(row)
+#         # Iterate through rows and columns to read data
+#         data = []
+#         for row in sheet.iter_rows(values_only=True):
+#             if any(cell is not None for cell in row):
+#                 data.append(row)
         
-        return data
+#         return data
     
-    except Exception as e:
-        print(f"Error reading the XLSX data: {e}")
-        return None
+#     except Exception as e:
+#         print(f"Error reading the XLSX data: {e}")
+#         return None
     
 
 def split_buildings_by_address(data):
@@ -150,10 +145,9 @@ def get_xml_url_by_scraping():
     
 def main():
     xml_url = get_xml_url_by_scraping()
-    # xml_url = 'https://www.bat-yam.muni.il/prdPics/%D7%A8%D7%A9%D7%99%D7%9E%D7%AA%20%D7%9E%D7%91%D7%A0%D7%99%D7%9D%20%D7%9E%D7%A1%D7%95%D7%9B%D7%A0%D7%99%D7%9D%20%D7%95%D7%AA%D7%99%D7%A7%D7%95%D7%9F%20%D7%9C%D7%99%D7%A7%D7%95%D7%99%D7%99%D7%9D236.xlsx'
     
     output_file_path = "bat-yam-dangerous-builds.xlsx"
-    fetch_and_save_xml_data(xml_url, output_file_path)
+    fetch_and_save_file(xml_url, output_file_path)
     
     # Reading the data from the output file
     data = read_xlsx_data(output_file_path)
