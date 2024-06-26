@@ -1,3 +1,5 @@
+# Service for fetching real estates from Yad 2 website.
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -232,7 +234,7 @@ def scrape_yad2(attempts=5):
 
 # Run the scraper
 
-def main():
+def fetch_data():
     data_from_file = read_data_from_json(data_path)
     
     # Add timestamp to each item
@@ -245,6 +247,6 @@ def main():
     scrape_yad2()
     
 if __name__ == "__main__":
-    main()
+    fetch_data()
 
     

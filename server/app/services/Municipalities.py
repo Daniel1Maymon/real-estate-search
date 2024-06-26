@@ -1,3 +1,5 @@
+# Service for fetching information about dangerous buildings from municipal websites
+
 import json
 from selenium import webdriver
 import requests
@@ -8,7 +10,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import date, datetime
-from secure_openpyxl import read_xlsx_data
+from utiles.secure_openpyxl import read_xlsx_data
 
 file_path = '236.xlsx'
 data_path = f'/home/daniel/projects/{file_path}'
